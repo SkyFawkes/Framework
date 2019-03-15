@@ -44,3 +44,15 @@ You should see random characters on the screen. Exit with clrt-C and try:
 ```
 python3 /usr/local/lib/python3.5/dist-packages/evdev/evtest.py
 ```
+### Setting up PiCam and OpenCV
+Connect the camera module to the Pi using the connector by the HDMI port, with the contacts facing the HDMI port. The power up the Pi.
+```
+sudo raspi-config
+```
+Enable the camera in the settings.
+Then install the following:
+```
+sudo apt-get install libhdf5-serial-dev libharfbuzz0b libatlas3-base libwebp6 libtiff5 libjasper1 libilmbase12 libopenexr22 libgstreamer1.0-0 libavcodec57 libavformat57 libswscale4 libgtk-3-0
+sudo pip3 install opencv-contrib-python-headless
+sudo pip3 install picamera
+```
