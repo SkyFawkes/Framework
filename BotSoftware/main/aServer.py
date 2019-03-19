@@ -33,6 +33,7 @@ class Server:
         while self.reader:
             localimage = None
             framedata = 0
+            framenumber = 0
             jpgImage = 0
             size = 0
 
@@ -42,16 +43,17 @@ class Server:
                     localimage = self.info.image  # Copy image to save lock time
                     self.info.image = None
                     framedata = self.info.framedata
+                    framenumber = self.info.frame
                 else:
                     jpgImage = None
                     size = 0
 
             if localimage is not None:
-                jpgImage = cv2.imencode('.jpg', localimage)[1].tostring()
+                jpgImage = cv2.imencode('.jpg', localimage, [int(cv2.IMWRITE_JPEG_QUALITY),20])[1].tostring()
                 size = len(jpgImage)
 
             # Create JSON header
-            jsondata = {'a': 1, 'size': size, 'framedata': framedata}
+            jsondata = {'a': 1, 'size': size, 'fdata': framedata, 'fnum': framenumber}
             jsonheader = json.dumps(jsondata).encode('utf-8')
             headerlength = len(jsonheader)
             print('JSON header: ' + str(jsondata))
@@ -60,15 +62,15 @@ class Server:
             #print('Sending header')
             self.writer.write(headerlength.to_bytes(2, byteorder='big'))
             self.writer.write(jsonheader)
-            await self.writer.drain()
 
             # Send jpg data
             if size != 0:
                 self.writer.write(jpgImage)
-                await self.writer.drain()
+            else:
+                await asyncio.sleep(0.1)
 
-            #print('Received acknowledgement: ' + str(data.decode()))
-            await asyncio.sleep(0.1)
+            await self.writer.drain()
+            await asyncio.sleep(0.02)
 
     def closeServer(self):
         self.writer.close()

@@ -1,5 +1,6 @@
 """
 This file controls the motor outputs.
+Called frequently with forward and angular velocity values. Must be non-blocking or asynchronous.
 It's designed to be swapped out with another file with the same functions, for a different motor setup
 """
 
@@ -7,15 +8,15 @@ import RPi.GPIO as GPIO
 import asyncio
 
 # Pi GPIO motor pin setup
-LFPin   = 12  # Left forward
-LRPin   = 16  # Left backward
-RFPin   = 24  # Right forward
-RRPin   = 25  # Left backward
+LFPin = 12  # Left forward
+LRPin = 16  # Left backward
+RFPin = 24  # Right forward
+RRPin = 25  # Left backward
 
 PWMFreq = 200  # Motor PWM frequency
 
 
-class Motors():
+class Motors:
     def __init__(self, enabled=False):
 
         # Initialise the pins and outputs. Run by main at startup.
@@ -79,7 +80,7 @@ class Motors():
                 self.RF.ChangeDutyCycle(100)
                 self.RR.ChangeDutyCycle(100)
 
-    async def motorBeep(self):
+    async def beepOk(self):
 
         # Make motors beep by controlling PWM frequency
 
@@ -93,6 +94,24 @@ class Motors():
         self.LF.ChangeFrequency(5274)  # E8
         self.LF.ChangeDutyCycle(80)
         await asyncio.sleep(0.025)
+
+        self.LF.ChangeDutyCycle(100)
+        self.LF.ChangeFrequency(PWMFreq)
+
+    async def beepError(self):
+
+        # Make motors beep by controlling PWM frequency
+
+        self.LF.ChangeFrequency(3520)  # A7
+        self.LF.ChangeDutyCycle(80)
+        await asyncio.sleep(0.05)
+
+        self.LF.ChangeDutyCycle(100)
+        await asyncio.sleep(0.1)
+
+        self.LF.ChangeFrequency(3520)  # A7
+        self.LF.ChangeDutyCycle(80)
+        await asyncio.sleep(0.05)
 
         self.LF.ChangeDutyCycle(100)
         self.LF.ChangeFrequency(PWMFreq)
